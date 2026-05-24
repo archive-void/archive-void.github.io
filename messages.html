@@ -63,7 +63,7 @@
             position: relative;
             z-index: 1;
             opacity: 0;
-            transition: opacity 0.6s ease;
+            transition: opacity 1.2s ease;
         }
         .container.visible {
             opacity: 1;
@@ -88,7 +88,7 @@
             content: '← ';
         }
 
-        /* 页面标题区域 */
+        /* 页面标题区域 - 初始完全透明，占位但不显示 */
         .page-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding-bottom: 16px;
@@ -97,6 +97,11 @@
             align-items: baseline;
             gap: 14px;
             flex-wrap: wrap;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .page-header.reveal {
+            opacity: 1;
         }
         .page-header .cn-title {
             font-size: 1.6rem;
@@ -197,29 +202,31 @@
             color: #888888;
         }
 
-        /* ---------- 入场动画 ---------- */
+        /* ---------- 入场动画层 ---------- */
         .intro-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             z-index: 100;
             pointer-events: none;
         }
         .intro-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
             opacity: 0;
             filter: blur(12px);
-            /* 先模糊显现，再滑动到最终位置 */
-            animation: revealText 1.2s ease forwards,
-                       moveToCorner 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0) 1.2s forwards;
+            /* 模糊显现动画 */
+            animation: revealText 1.2s ease forwards;
+            /* 后续移动由JS控制，通过添加transition */
+            transition: transform 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0);
         }
         .intro-text .cn {
             font-size: 1.8rem;
@@ -242,23 +249,11 @@
                 filter: blur(0);
             }
         }
-        @keyframes moveToCorner {
-            0% {
-                transform: translate(0, 0);
-            }
-            100% {
-                /* 位移量：距离左上角 (40px, 40px) 的偏移，与.page-header位置对齐 */
-                transform: translate(
-                    calc(-50vw + 40px + 14px),
-                    calc(-50vh + 40px + 14px)
-                );
-            }
-        }
     </style>
 </head>
 <body>
 
-    <!-- 动画覆盖层：标题先居中模糊出现，再滑动到左上角 -->
+    <!-- 入场动画文字（将滑动到标题位置） -->
     <div class="intro-overlay" id="introOverlay">
         <div class="intro-text" id="introText">
             <span class="cn">消息</span>
@@ -266,11 +261,12 @@
         </div>
     </div>
 
-    <!-- 主内容区域，动画结束后显示 -->
+    <!-- 主内容区域 -->
     <div class="container" id="mainContainer">
         <a href="index.html" class="back-link">返回</a>
 
-        <div class="page-header">
+        <!-- 标题初始透明，占位 -->
+        <div class="page-header" id="pageHeader">
             <span class="cn-title">消息</span>
             <span class="en-title">Messages</span>
         </div>
@@ -289,18 +285,55 @@
     <div class="sigil">◆</div>
 
     <script>
-        const overlay = document.getElementById('introOverlay');
-        const mainContainer = document.getElementById('mainContainer');
-        const introText = document.getElementById('introText');
+        (function() {
+            const introText = document.getElementById('introText');
+            const pageHeader = document.getElementById('pageHeader');
+            const mainContainer = document.getElementById('mainContainer');
+            const introOverlay = document.getElementById('introOverlay');
 
-        // 当 moveToCorner 动画结束时，隐藏覆盖层并显示主内容
-        introText.addEventListener('animationend', function(e) {
-            // 检查是否是 moveToCorner 动画结束（animationName）
-            if (e.animationName === 'moveToCorner') {
-                overlay.style.display = 'none';
-                mainContainer.classList.add('visible');
-            }
-        });
+            // 等待模糊显现动画结束（1.2s）
+            introText.addEventListener('animationend', function(e) {
+                if (e.animationName === 'revealText') {
+                    // 获取标题中“消息”中文部分的实际位置（取cn-title元素）
+                    const cnTitle = pageHeader.querySelector('.cn-title');
+                    const targetRect = cnTitle.getBoundingClientRect();
+
+                    // 计算目标位置相对于视口中心的偏移量
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+                    const targetX = targetRect.left + targetRect.width / 2;
+                    const targetY = targetRect.top + targetRect.height / 2;
+                    const deltaX = targetX - centerX;
+                    const deltaY = targetY - centerY;
+
+                    // 设置移动的目标transform（覆盖之前的translate(-50%,-50%)）
+                    // 需要先移除原有的动画transform，再设置新值
+                    introText.style.animation = 'none'; // 停止模糊动画
+                    introText.style.opacity = '1';
+                    introText.style.filter = 'blur(0)';
+                    // 重新设置初始位置为当前中心，以便transition生效
+                    introText.style.transform = 'translate(-50%, -50%)';
+
+                    // 强制回流
+                    introText.offsetHeight;
+
+                    // 添加过渡并移动到目标位置
+                    introText.style.transition = 'transform 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0)';
+                    introText.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
+
+                    // 移动结束后：隐藏动画文字，显示真实标题，并淡入其他内容
+                    introText.addEventListener('transitionend', function handler() {
+                        introText.removeEventListener('transitionend', handler);
+                        // 隐藏动画覆盖层
+                        introOverlay.style.display = 'none';
+                        // 瞬间显示真实标题（无动画）
+                        pageHeader.classList.add('reveal');
+                        // 缓慢淡入其余内容
+                        mainContainer.classList.add('visible');
+                    });
+                }
+            });
+        })();
     </script>
 </body>
 </html>
