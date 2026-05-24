@@ -78,7 +78,6 @@
             content: '← ';
         }
 
-        /* 主布局容器（无 opacity 过渡，始终可见） */
         .main-container {
             position: relative;
             z-index: 1;
@@ -89,14 +88,13 @@
             align-items: center;
         }
 
-        /* 最终标题：瞬间显现，无任何过渡 */
         .final-title {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
             margin-bottom: 32px;
-            opacity: 0; /* 由 JS 瞬间设为 1 */
+            opacity: 0;
         }
         .final-title .cn {
             font-size: 1.8rem;
@@ -109,7 +107,6 @@
             color: #888;
         }
 
-        /* 需要淡入的内容包裹（横线+卡片） */
         .fade-content {
             width: 100%;
             display: flex;
@@ -135,58 +132,164 @@
             transform: scaleX(1);
         }
 
+        /* 档案网格 - 4列 */
         .archive-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 28px;
-            width: 70%;
-            max-width: 680px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 82%;
+            max-width: 920px;
             margin: 0 auto;
         }
 
+        /* 卡片：宽比高长 4:3 */
         .archive-card {
-            aspect-ratio: 1 / 1;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             position: relative;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-        }
-        .archive-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .card-1 { background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); }
-        .card-2 { background: linear-gradient(135deg, #222222 0%, #383838 100%); }
-        .card-3 { background: linear-gradient(135deg, #2e2e2e 0%, #444444 100%); }
-        .card-4 { background: linear-gradient(135deg, #3a3a3a 0%, #505050 100%); }
-        .card-5 { background: linear-gradient(135deg, #464646 0%, #5c5c5c 100%); }
-        .card-6 { background: linear-gradient(135deg, #525252 0%, #686868 100%); }
-
-        .card-label {
-            width: 70%;
-            height: 22%;
-            background: rgba(255, 255, 255, 0.95);
+            aspect-ratio: 4 / 3;
             border-radius: 10px;
+            cursor: pointer;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.35s ease;
+            /* 立体阴影 */
+            box-shadow:
+                0 8px 20px rgba(0, 0, 0, 0.7),
+                0 2px 6px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+        .card-normal:hover {
+            transform: translateY(-6px);
+            box-shadow:
+                0 0 24px rgba(255, 255, 255, 0.45),
+                0 0 50px rgba(255, 255, 255, 0.2),
+                0 12px 30px rgba(0, 0, 0, 0.75),
+                0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .card-corrupted:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 10px 26px rgba(255, 0, 0, 0.2),
+                0 4px 10px rgba(0, 0, 0, 0.7),
+                0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 背景渐变层 */
+        .card-bg {
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            transition: filter 0.35s ease, brightness 0.35s ease;
+        }
+        /* 12级连续灰度渐变 - 从亮到暗 */
+        .card-1  .card-bg { background: linear-gradient(145deg, #d0d0d0 0%, #bebebe 50%, #aaaaaa 100%); }
+        .card-2  .card-bg { background: linear-gradient(145deg, #bcbcbc 0%, #acacac 50%, #9a9a9a 100%); }
+        .card-3  .card-bg { background: linear-gradient(145deg, #aaaaaa 0%, #9a9a9a 50%, #8a8a8a 100%); }
+        .card-4  .card-bg { background: linear-gradient(145deg, #989898 0%, #888888 50%, #787878 100%); }
+        .card-5  .card-bg { background: linear-gradient(145deg, #868686 0%, #767676 50%, #686868 100%); }
+        .card-6  .card-bg { background: linear-gradient(145deg, #747474 0%, #646464 50%, #565656 100%); }
+        .card-7  .card-bg { background: linear-gradient(145deg, #626262 0%, #525252 50%, #464646 100%); }
+        .card-8  .card-bg { background: linear-gradient(145deg, #505050 0%, #424242 50%, #363636 100%); }
+        .card-9  .card-bg { background: linear-gradient(145deg, #404040 0%, #343434 50%, #2a2a2a 100%); }
+        .card-10 .card-bg { background: linear-gradient(145deg, #323232 0%, #282828 50%, #202020 100%); }
+        .card-11 .card-bg { background: linear-gradient(145deg, #262626 0%, #1e1e1e 50%, #181818 100%); }
+        .card-12 .card-bg { background: linear-gradient(145deg, #1c1c1c 0%, #161616 50%, #101010 100%); }
+
+        /* 正常卡片悬停变亮 */
+        .card-normal:hover .card-bg {
+            filter: brightness(1.2);
+        }
+        /* 侵蚀卡片默认变暗，悬停更暗 */
+        .card-corrupted .card-bg {
+            filter: brightness(0.68);
+        }
+        .card-corrupted:hover .card-bg {
+            filter: brightness(0.35);
+        }
+
+        /* 粒子层 */
+        .particle-layer {
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(155, 26, 26, 0.6);
+            opacity: 0;
+            transition: none;
+        }
+        .particle.visible {
+            animation: particlePulse var(--dur) ease-in-out var(--del) infinite;
+        }
+
+        @keyframes particlePulse {
+            0%,
+            100% {
+                opacity: 0.15;
+            }
+            22% {
+                opacity: 0.8;
+            }
+            38% {
+                opacity: 0.2;
+            }
+            55% {
+                opacity: 0.9;
+            }
+            70% {
+                opacity: 0.25;
+            }
+            85% {
+                opacity: 0.65;
+            }
+        }
+
+        /* 标签 */
+        .card-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 72%;
+            height: 24%;
+            border-radius: 7px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: "Courier New", "Fira Code", monospace;
-            font-size: 1.4rem;
             font-weight: 700;
-            letter-spacing: 0.15em;
-            color: #000000;
-            transition: background 0.2s, transform 0.2s;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            letter-spacing: 0.1em;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, text-shadow 0.25s ease;
+            z-index: 5;
+            pointer-events: none;
+            white-space: nowrap;
+            font-size: 1.15rem;
         }
-        .archive-card:hover .card-label {
+        .card-normal .card-label {
+            background: rgba(255, 255, 255, 0.94);
+            color: #000000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            font-size: 1.3rem;
+        }
+        .card-normal:hover .card-label {
             background: #ffffff;
-            transform: scale(1.02);
+            transform: translate(-50%, -50%) scale(1.04);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-corrupted .card-label {
+            background: rgba(135, 22, 22, 0.88);
+            color: #e6e6e6;
+            box-shadow: 0 0 6px rgba(255, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            font-size: 0.95rem;
+        }
+        .card-corrupted:hover .card-label {
+            transform: translate(-50%, -50%) scale(1.14);
+            text-shadow: 0 0 18px rgba(255, 45, 45, 0.9), 0 0 34px rgba(255, 0, 0, 0.55);
+            box-shadow: 0 0 22px rgba(255, 0, 0, 0.5), 0 0 8px rgba(255, 0, 0, 0.3);
         }
 
         /* 开场动画 */
@@ -202,7 +305,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .anim-wrapper {
             position: relative;
             display: inline-flex;
@@ -210,7 +312,6 @@
             align-items: center;
             gap: 8px;
         }
-
         .anim-wrapper svg {
             position: absolute;
             top: 50%;
@@ -220,7 +321,6 @@
             height: calc(100% + 16px);
             pointer-events: none;
         }
-
         .draw-rect {
             stroke: rgba(255, 255, 255, 0.6);
             stroke-width: 1.5;
@@ -231,12 +331,14 @@
             stroke-dashoffset: 2000;
             animation: drawLine 1.8s cubic-bezier(0.42, 0.0, 0.58, 1.0) forwards;
         }
-
         @keyframes drawLine {
-            0% { stroke-dashoffset: 2000; }
-            100% { stroke-dashoffset: 0; }
+            0% {
+                stroke-dashoffset: 2000;
+            }
+            100% {
+                stroke-dashoffset: 0;
+            }
         }
-
         .anim-text {
             opacity: 0;
             filter: blur(12px);
@@ -252,10 +354,15 @@
             letter-spacing: 0.15em;
             color: #888;
         }
-
         @keyframes revealText {
-            0% { opacity: 0; filter: blur(12px); }
-            100% { opacity: 1; filter: blur(0); }
+            0% {
+                opacity: 0;
+                filter: blur(12px);
+            }
+            100% {
+                opacity: 1;
+                filter: blur(0);
+            }
         }
     </style>
 </head>
@@ -263,42 +370,94 @@
 
     <a href="index.html" class="back-link">返回</a>
 
-    <!-- 开场动画覆盖层 -->
     <div class="intro-overlay" id="introOverlay">
         <div class="anim-wrapper" id="animWrapper">
             <svg id="rectSvg" viewBox="0 0 200 100" preserveAspectRatio="none">
-                <path id="rectPath" d="M 100 0 L 200 0 L 200 100 L 0 100 L 0 0 L 100 0" 
-                      class="draw-rect"/>
+                <path id="rectPath" d="M 100 0 L 200 0 L 200 100 L 0 100 L 0 0 L 100 0"
+                class="draw-rect" />
             </svg>
             <div class="anim-text anim-cn">档案</div>
             <div class="anim-text anim-en">Archives</div>
         </div>
     </div>
 
-    <!-- 主内容（始终可见，但内部淡入元素单独控制） -->
     <div class="main-container" id="mainContainer">
-        <!-- 最终标题：瞬间显现 -->
         <div class="final-title" id="finalTitle">
             <span class="cn">档案</span>
             <span class="en">Archives</span>
         </div>
 
-        <!-- 淡入内容包裹：横线 + 卡片 -->
         <div class="fade-content" id="fadeContent">
             <div class="top-line" id="topLine"></div>
-            <div class="archive-grid">
-                <div class="archive-card card-1"><div class="card-label">111</div></div>
-                <div class="archive-card card-2"><div class="card-label">222</div></div>
-                <div class="archive-card card-3"><div class="card-label">333</div></div>
-                <div class="archive-card card-4"><div class="card-label">444</div></div>
-                <div class="archive-card card-5"><div class="card-label">555</div></div>
-                <div class="archive-card card-6"><div class="card-label">666</div></div>
+            <div class="archive-grid" id="archiveGrid">
+                <!-- 卡片1：正常 -->
+                <div class="archive-card card-normal card-1">
+                    <div class="card-bg"></div>
+                    <div class="card-label">111</div>
+                </div>
+                <!-- 卡片2~12：侵蚀 -->
+                <div class="archive-card card-corrupted card-2" data-card="2">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-3" data-card="3">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-4" data-card="4">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-5" data-card="5">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-6" data-card="6">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-7" data-card="7">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-8" data-card="8">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-9" data-card="9">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-10" data-card="10">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-11" data-card="11">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
+                <div class="archive-card card-corrupted card-12" data-card="12">
+                    <div class="card-bg"></div>
+                    <div class="particle-layer"></div>
+                    <div class="card-label">Unrecorded</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         (function() {
+            // ========== 开场动画 ==========
             const animWrapper = document.getElementById('animWrapper');
             const introOverlay = document.getElementById('introOverlay');
             const finalTitle = document.getElementById('finalTitle');
@@ -310,7 +469,6 @@
             let drawFinished = false;
             let revealFinished = false;
 
-            // 线条绘制完成
             rectPath.addEventListener('animationend', function(e) {
                 if (e.animationName === 'drawLine') {
                     drawFinished = true;
@@ -320,7 +478,6 @@
                 }
             });
 
-            // 文字渐显完成
             const animTexts = document.querySelectorAll('.anim-text');
             animTexts.forEach(el => {
                 el.addEventListener('animationend', function(e) {
@@ -341,11 +498,9 @@
                 const wrapperRect = animWrapper.getBoundingClientRect();
                 const currentCenterX = wrapperRect.left + wrapperRect.width / 2;
                 const currentCenterY = wrapperRect.top + wrapperRect.height / 2;
-
                 const targetRect = finalTitle.getBoundingClientRect();
                 const targetCenterX = targetRect.left + targetRect.width / 2;
                 const targetCenterY = targetRect.top + targetRect.height / 2;
-
                 const deltaX = targetCenterX - currentCenterX;
                 const deltaY = targetCenterY - currentCenterY;
 
@@ -354,22 +509,162 @@
 
                 animWrapper.addEventListener('transitionend', function handler() {
                     animWrapper.removeEventListener('transitionend', handler);
-
-                    // 短暂停留 0.6 秒
                     setTimeout(() => {
-                        // 瞬间移除开屏文字
                         introOverlay.style.display = 'none';
-                        // 瞬间显示最终标题（无过渡）
                         finalTitle.style.opacity = '1';
-                        // 淡入横线和卡片
                         fadeContent.classList.add('visible');
-                        // 横线展开
-                        setTimeout(() => {
-                            topLine.classList.add('expand');
-                        }, 100);
+                        setTimeout(() => { topLine.classList.add('expand'); }, 100);
                     }, 600);
                 });
             }
+
+            // ========== 粒子系统 ==========
+            const corruptedCards = document.querySelectorAll('.card-corrupted');
+            const TOTAL_PARTICLES = 15;
+            const AMBIENT_COUNT = 4;
+            const SLOW_INTERVAL = 800;
+            const FAST_INTERVAL = 180;
+
+            // 存储每个卡片的粒子数据
+            const cardParticleData = new Map();
+
+            corruptedCards.forEach(card => {
+                const layer = card.querySelector('.particle-layer');
+                const particles = [];
+
+                for (let i = 0; i < TOTAL_PARTICLES; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+
+                    const w = 2 + Math.random() * 6;
+                    const h = 2 + Math.random() * 6;
+                    const shapeType = Math.floor(Math.random() * 4);
+                    let borderRadius = '';
+                    let clipPath = '';
+                    switch (shapeType) {
+                        case 0:
+                            borderRadius = '50%';
+                            break;
+                        case 1:
+                            borderRadius = (30 + Math.random() * 40) + '% / ' + (20 + Math.random() * 30) + '%';
+                            break;
+                        case 2:
+                            borderRadius = (10 + Math.random() * 50) + '% ' + (10 + Math.random() * 50) + '% ' + (10 +
+                                Math.random() * 50) + '% ' + (10 + Math.random() * 50) + '%';
+                            break;
+                        case 3:
+                            const pts = [];
+                            const n = 3 + Math.floor(Math.random() * 3);
+                            for (let j = 0; j < n; j++) {
+                                pts.push((20 + Math.random() * 60) + '% ' + (20 + Math.random() * 60) + '%');
+                            }
+                            clipPath = 'polygon(' + pts.join(', ') + ')';
+                            break;
+                    }
+                    const duration = 2.2 + Math.random() * 3.5;
+                    const delay = Math.random() * 4;
+                    const left = 3 + Math.random() * 90;
+                    const top = 3 + Math.random() * 90;
+
+                    particle.style.cssText = `
+                        left: ${left}%;
+                        top: ${top}%;
+                        width: ${w}px;
+                        height: ${h}px;
+                        border-radius: ${borderRadius};
+                        clip-path: ${clipPath};
+                        --dur: ${duration}s;
+                        --del: ${delay}s;
+                    `;
+                    layer.appendChild(particle);
+                    particles.push({ el: particle, duration, delay });
+                }
+
+                cardParticleData.set(card, {
+                    particles,
+                    isHovered: false,
+                    ambientSet: new Set(),
+                    lastUpdate: 0,
+                });
+
+                // 初始化ambient粒子
+                refreshAmbient(card);
+
+                // 悬停事件
+                card.addEventListener('mouseenter', () => {
+                    const data = cardParticleData.get(card);
+                    data.isHovered = true;
+                    // 悬停时全部粒子可见
+                    data.particles.forEach(p => {
+                        p.el.classList.add('visible');
+                        p.el.style.setProperty('--dur', (0.08 + Math.random() * 0.2) + 's');
+                    });
+                });
+                card.addEventListener('mouseleave', () => {
+                    const data = cardParticleData.get(card);
+                    data.isHovered = false;
+                    // 恢复：重置动画时长，刷新ambient
+                    data.particles.forEach(p => {
+                        p.el.style.setProperty('--dur', p.duration + 's');
+                    });
+                    refreshAmbient(card);
+                });
+            });
+
+            function refreshAmbient(card) {
+                const data = cardParticleData.get(card);
+                if (!data || data.isHovered) return;
+                // 清除旧ambient
+                data.ambientSet.forEach(i => {
+                    data.particles[i].el.classList.remove('visible');
+                });
+                data.ambientSet.clear();
+                // 随机选AMBIENT_COUNT个
+                const indices = [];
+                while (indices.length < AMBIENT_COUNT) {
+                    const r = Math.floor(Math.random() * TOTAL_PARTICLES);
+                    if (!indices.includes(r)) indices.push(r);
+                }
+                indices.forEach(i => {
+                    data.particles[i].el.classList.add('visible');
+                    data.ambientSet.add(i);
+                });
+                // 随机更新这些粒子的位置
+                indices.forEach(i => {
+                    const p = data.particles[i];
+                    p.el.style.left = (3 + Math.random() * 90) + '%';
+                    p.el.style.top = (3 + Math.random() * 90) + '%';
+                });
+            }
+
+            function updateAllParticles(timestamp) {
+                corruptedCards.forEach(card => {
+                    const data = cardParticleData.get(card);
+                    if (!data) return;
+
+                    if (data.isHovered) {
+                        // 悬停：快速更新所有粒子位置
+                        if (!data._lastFast || timestamp - data._lastFast > FAST_INTERVAL) {
+                            data._lastFast = timestamp;
+                            data.particles.forEach(p => {
+                                p.el.style.left = (3 + Math.random() * 90) + '%';
+                                p.el.style.top = (3 + Math.random() * 90) + '%';
+                            });
+                        }
+                    } else {
+                        // 非悬停：慢速更新ambient粒子位置并刷新选择
+                        if (!data._lastSlow || timestamp - data._lastSlow > SLOW_INTERVAL) {
+                            data._lastSlow = timestamp;
+                            refreshAmbient(card);
+                        }
+                    }
+                });
+                requestAnimationFrame(updateAllParticles);
+            }
+
+            // 启动粒子更新循环
+            requestAnimationFrame(updateAllParticles);
+
         })();
     </script>
 </body>
