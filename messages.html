@@ -63,7 +63,7 @@
             position: relative;
             z-index: 1;
             opacity: 0;
-            transition: opacity 0.8s ease;
+            transition: opacity 0.6s ease;
         }
         .container.visible {
             opacity: 1;
@@ -160,7 +160,6 @@
             transform: translateX(3px);
         }
 
-        /* 装饰性元素 */
         .message-item::before {
             content: '';
             position: absolute;
@@ -177,7 +176,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* 底部标记 */
         .footer-note {
             margin-top: 40px;
             font-size: 0.7rem;
@@ -199,7 +197,7 @@
             color: #888888;
         }
 
-        /* 动画覆盖层 */
+        /* ---------- 入场动画 ---------- */
         .intro-overlay {
             position: fixed;
             top: 0;
@@ -219,8 +217,9 @@
             gap: 8px;
             opacity: 0;
             filter: blur(12px);
-            animation: revealText 2s ease forwards,
-                       moveToCorner 1s ease 2.5s forwards;
+            /* 先模糊显现，再滑动到最终位置 */
+            animation: revealText 1.2s ease forwards,
+                       moveToCorner 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0) 1.2s forwards;
         }
         .intro-text .cn {
             font-size: 1.8rem;
@@ -246,21 +245,20 @@
         @keyframes moveToCorner {
             0% {
                 transform: translate(0, 0);
-                opacity: 1;
             }
             100% {
+                /* 位移量：距离左上角 (40px, 40px) 的偏移，与.page-header位置对齐 */
                 transform: translate(
                     calc(-50vw + 40px + 14px),
                     calc(-50vh + 40px + 14px)
                 );
-                opacity: 1;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- 动画覆盖层 -->
+    <!-- 动画覆盖层：标题先居中模糊出现，再滑动到左上角 -->
     <div class="intro-overlay" id="introOverlay">
         <div class="intro-text" id="introText">
             <span class="cn">消息</span>
@@ -268,7 +266,7 @@
         </div>
     </div>
 
-    <!-- 主内容区域 -->
+    <!-- 主内容区域，动画结束后显示 -->
     <div class="container" id="mainContainer">
         <a href="index.html" class="back-link">返回</a>
 
@@ -291,16 +289,18 @@
     <div class="sigil">◆</div>
 
     <script>
-        // 动画结束后隐藏覆盖层，显示主内容
         const overlay = document.getElementById('introOverlay');
-        const main = document.getElementById('mainContainer');
+        const mainContainer = document.getElementById('mainContainer');
+        const introText = document.getElementById('introText');
 
-        // 动画总时长：revealText 2s + 停留 0.5s + moveToCorner 1s = 3.5s
-        // moveToCorner 动画结束后 (2.5s + 1s) 隐藏覆盖层
-        setTimeout(() => {
-            overlay.style.display = 'none';
-            main.classList.add('visible');
-        }, 3600); // 稍多一点点保证动画完全结束
+        // 当 moveToCorner 动画结束时，隐藏覆盖层并显示主内容
+        introText.addEventListener('animationend', function(e) {
+            // 检查是否是 moveToCorner 动画结束（animationName）
+            if (e.animationName === 'moveToCorner') {
+                overlay.style.display = 'none';
+                mainContainer.classList.add('visible');
+            }
+        });
     </script>
 </body>
 </html>
