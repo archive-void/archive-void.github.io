@@ -56,23 +56,17 @@
             background-size: 256px 256px;
         }
 
+        /* 主内容容器，初始透明 */
         .container {
             max-width: 680px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
-            animation: fadeIn 1.2s ease-out;
+            opacity: 0;
+            transition: opacity 0.8s ease;
         }
-
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .container.visible {
+            opacity: 1;
         }
 
         /* 返回链接 */
@@ -166,7 +160,7 @@
             transform: translateX(3px);
         }
 
-        /* 装饰性元素：左侧小标记 */
+        /* 装饰性元素 */
         .message-item::before {
             content: '';
             position: absolute;
@@ -193,7 +187,6 @@
             opacity: 0.5;
         }
 
-        /* 隐秘符号 */
         .sigil {
             position: fixed;
             bottom: 28px;
@@ -205,53 +198,109 @@
             letter-spacing: 0.2em;
             color: #888888;
         }
+
+        /* 动画覆盖层 */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .intro-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            filter: blur(12px);
+            animation: revealText 2s ease forwards,
+                       moveToCorner 1s ease 2.5s forwards;
+        }
+        .intro-text .cn {
+            font-size: 1.8rem;
+            letter-spacing: 0.2em;
+            color: #f0f0f0;
+        }
+        .intro-text .en {
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+            color: #888;
+        }
+
+        @keyframes revealText {
+            0% {
+                opacity: 0;
+                filter: blur(12px);
+            }
+            100% {
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+        @keyframes moveToCorner {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(
+                    calc(-50vw + 40px + 14px),
+                    calc(-50vh + 40px + 14px)
+                );
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- 返回首页链接 -->
+    <!-- 动画覆盖层 -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-text" id="introText">
+            <span class="cn">消息</span>
+            <span class="en">Messages</span>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="container" id="mainContainer">
         <a href="index.html" class="back-link">返回</a>
 
-        <!-- 页面标题 -->
         <div class="page-header">
             <span class="cn-title">消息</span>
             <span class="en-title">Messages</span>
         </div>
 
-        <!-- 消息列表 -->
         <div class="message-list">
             <a href="#" class="message-item">
-                <span class="date">2025.07.12</span>
-                <span class="title">初始信号捕获报告</span>
-                <span class="arrow">→</span>
-            </a>
-            <a href="#" class="message-item">
-                <span class="date">2025.08.03</span>
-                <span class="title">频段干扰与异常模式</span>
-                <span class="arrow">→</span>
-            </a>
-            <a href="#" class="message-item">
-                <span class="date">2025.09.18</span>
-                <span class="title">坐标交叉验证结果</span>
-                <span class="arrow">→</span>
-            </a>
-            <a href="#" class="message-item">
-                <span class="date">2025.10.01</span>
-                <span class="title">████ 协议启动</span>
-                <span class="arrow">→</span>
-            </a>
-            <a href="#" class="message-item">
-                <span class="date">2025.11.07</span>
-                <span class="title">未知发送者身份推测</span>
+                <span class="date">2026.05.24</span>
+                <span class="title">STAAAAART...</span>
                 <span class="arrow">→</span>
             </a>
         </div>
 
-        <div class="footer-note">[ 共 5 条记录 · 持续监控中 ]</div>
+        <div class="footer-note">[ 共 1 条记录 · 持续监控中 ]</div>
     </div>
 
     <div class="sigil">◆</div>
 
+    <script>
+        // 动画结束后隐藏覆盖层，显示主内容
+        const overlay = document.getElementById('introOverlay');
+        const main = document.getElementById('mainContainer');
+
+        // 动画总时长：revealText 2s + 停留 0.5s + moveToCorner 1s = 3.5s
+        // moveToCorner 动画结束后 (2.5s + 1s) 隐藏覆盖层
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            main.classList.add('visible');
+        }, 3600); // 稍多一点点保证动画完全结束
+    </script>
 </body>
 </html>
