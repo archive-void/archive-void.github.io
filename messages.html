@@ -88,7 +88,7 @@
             content: '← ';
         }
 
-        /* 页面标题区域 - 初始完全透明，占位但不显示 */
+        /* 页面标题区域（仅用于定位参考，实际不可见） */
         .page-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding-bottom: 16px;
@@ -97,11 +97,8 @@
             align-items: baseline;
             gap: 14px;
             flex-wrap: wrap;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-        .page-header.reveal {
-            opacity: 1;
+            visibility: hidden; /* 占位但不可见，用于获取坐标 */
+            pointer-events: none;
         }
         .page-header .cn-title {
             font-size: 1.6rem;
@@ -202,41 +199,34 @@
             color: #888888;
         }
 
-        /* ---------- 入场动画层 ---------- */
-        .intro-overlay {
+        /* ---------- 入场动画元素 ---------- */
+        .anim-text {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             z-index: 100;
             pointer-events: none;
-        }
-        .intro-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
             opacity: 0;
             filter: blur(12px);
             /* 模糊显现动画 */
             animation: revealText 1.2s ease forwards;
-            /* 后续移动由JS控制，通过添加transition */
+            /* 后续移动由JS设置transition */
             transition: transform 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0);
+            white-space: nowrap;
         }
-        .intro-text .cn {
+        .anim-cn {
             font-size: 1.8rem;
             letter-spacing: 0.2em;
             color: #f0f0f0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
-        .intro-text .en {
+        .anim-en {
             font-size: 1rem;
             letter-spacing: 0.15em;
             color: #888;
+            top: calc(50% + 2.5rem); /* 中文下方，模拟纵排列 */
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         @keyframes revealText {
@@ -253,22 +243,19 @@
 </head>
 <body>
 
-    <!-- 入场动画文字（将滑动到标题位置） -->
-    <div class="intro-overlay" id="introOverlay">
-        <div class="intro-text" id="introText">
-            <span class="cn">消息</span>
-            <span class="en">Messages</span>
-        </div>
-    </div>
+    <!-- 动画元素：中文 -->
+    <div id="animCN" class="anim-text anim-cn">消息</div>
+    <!-- 动画元素：英文 -->
+    <div id="animEN" class="anim-text anim-en">Messages</div>
 
     <!-- 主内容区域 -->
     <div class="container" id="mainContainer">
         <a href="index.html" class="back-link">返回</a>
 
-        <!-- 标题初始透明，占位 -->
+        <!-- 隐藏的标题区域，仅用于坐标参考 -->
         <div class="page-header" id="pageHeader">
-            <span class="cn-title">消息</span>
-            <span class="en-title">Messages</span>
+            <span class="cn-title" id="cnTarget">消息</span>
+            <span class="en-title" id="enTarget">Messages</span>
         </div>
 
         <div class="message-list">
@@ -286,53 +273,88 @@
 
     <script>
         (function() {
-            const introText = document.getElementById('introText');
-            const pageHeader = document.getElementById('pageHeader');
+            const animCN = document.getElementById('animCN');
+            const animEN = document.getElementById('animEN');
+            const cnTarget = document.getElementById('cnTarget');
+            const enTarget = document.getElementById('enTarget');
             const mainContainer = document.getElementById('mainContainer');
-            const introOverlay = document.getElementById('introOverlay');
 
             // 等待模糊显现动画结束（1.2s）
-            introText.addEventListener('animationend', function(e) {
+            animCN.addEventListener('animationend', function(e) {
                 if (e.animationName === 'revealText') {
-                    // 获取标题中“消息”中文部分的实际位置（取cn-title元素）
-                    const cnTitle = pageHeader.querySelector('.cn-title');
-                    const targetRect = cnTitle.getBoundingClientRect();
-
-                    // 计算目标位置相对于视口中心的偏移量
-                    const centerX = window.innerWidth / 2;
-                    const centerY = window.innerHeight / 2;
-                    const targetX = targetRect.left + targetRect.width / 2;
-                    const targetY = targetRect.top + targetRect.height / 2;
-                    const deltaX = targetX - centerX;
-                    const deltaY = targetY - centerY;
-
-                    // 设置移动的目标transform（覆盖之前的translate(-50%,-50%)）
-                    // 需要先移除原有的动画transform，再设置新值
-                    introText.style.animation = 'none'; // 停止模糊动画
-                    introText.style.opacity = '1';
-                    introText.style.filter = 'blur(0)';
-                    // 重新设置初始位置为当前中心，以便transition生效
-                    introText.style.transform = 'translate(-50%, -50%)';
-
-                    // 强制回流
-                    introText.offsetHeight;
-
-                    // 添加过渡并移动到目标位置
-                    introText.style.transition = 'transform 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0)';
-                    introText.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
-
-                    // 移动结束后：隐藏动画文字，显示真实标题，并淡入其他内容
-                    introText.addEventListener('transitionend', function handler() {
-                        introText.removeEventListener('transitionend', handler);
-                        // 隐藏动画覆盖层
-                        introOverlay.style.display = 'none';
-                        // 瞬间显示真实标题（无动画）
-                        pageHeader.classList.add('reveal');
-                        // 缓慢淡入其余内容
-                        mainContainer.classList.add('visible');
-                    });
+                    // 确保两个动画都结束后再移动（英文可能稍晚？同时开始，同时结束）
+                    // 简单起见，我们检查英文是否也已结束，或者直接开始移动
+                    // 这里设定：中文动画结束后开始计算并移动两个元素
+                    startMove();
                 }
             });
+            // 为防止英文动画先结束，也监听
+            animEN.addEventListener('animationend', function(e) {
+                if (e.animationName === 'revealText') {
+                    // 如果中文已经结束，则移动
+                    if (animCN.style.animationPlayState !== 'running') {
+                        startMove();
+                    }
+                }
+            });
+
+            let moved = false;
+            function startMove() {
+                if (moved) return;
+                moved = true;
+
+                // 获取目标元素的位置（基于视口）
+                const cnRect = cnTarget.getBoundingClientRect();
+                const enRect = enTarget.getBoundingClientRect();
+
+                // 计算中文目标中心坐标
+                const cnTargetX = cnRect.left + cnRect.width / 2;
+                const cnTargetY = cnRect.top + cnRect.height / 2;
+                // 英文目标中心
+                const enTargetX = enRect.left + enRect.width / 2;
+                const enTargetY = enRect.top + enRect.height / 2;
+
+                // 当前动画元素位置：初始设置在 center，通过 transform: translate(-50%,-50%)
+                // 因此要移动到目标中心，需要计算相对于视口中心的偏移量
+                const viewportCenterX = window.innerWidth / 2;
+                const viewportCenterY = window.innerHeight / 2;
+
+                // 中文需要移动的偏移量
+                const deltaCNX = cnTargetX - viewportCenterX;
+                const deltaCNY = cnTargetY - viewportCenterY;
+                // 英文需要移动的偏移量
+                const deltaENX = enTargetX - viewportCenterX;
+                const deltaENY = enTargetY - viewportCenterY;
+
+                // 清除动画，设置当前状态，然后应用transition移动
+                [animCN, animEN].forEach(el => {
+                    el.style.animation = 'none';
+                    el.style.opacity = '1';
+                    el.style.filter = 'blur(0)';
+                    // 强制回流
+                    el.offsetHeight;
+                });
+
+                // 设置transition并移动到目标位置
+                animCN.style.transition = 'transform 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0)';
+                animCN.style.transform = `translate(calc(-50% + ${deltaCNX}px), calc(-50% + ${deltaCNY}px))`;
+
+                animEN.style.transition = 'transform 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0)';
+                animEN.style.transform = `translate(calc(-50% + ${deltaENX}px), calc(-50% + ${deltaENY}px))`;
+
+                // 监听英文移动结束（两者同时结束，只监听一个即可）
+                animEN.addEventListener('transitionend', function handler() {
+                    animEN.removeEventListener('transitionend', handler);
+                    // 移动结束，将动画元素转为静态定位（固定在最终位置）
+                    // 方法：移除transition，直接设置left/top为当前计算出的位置，或者保持fixed但不再变化
+                    // 为了后续页面滚动不影响，可改为absolute？页面不需要滚动，保持fixed即可。
+                    // 同时让其余内容淡入
+                    mainContainer.classList.add('visible');
+
+                    // 可选：将动画元素样式固定，防止窗口大小变化时错位（简化处理，保持fixed）
+                    // 不再需要隐藏任何元素，动画文字永久保留。
+                });
+            }
         })();
     </script>
 </body>
