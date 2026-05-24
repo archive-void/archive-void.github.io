@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>档案 - ARG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: "Courier New", "Fira Code", "SF Mono", "Menlo", "PingFang SC", "Microsoft YaHei", monospace;
+            min-height: 100vh;
+            padding: 40px 0 60px;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: default;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, 0.03) 2px,
+                    rgba(0, 0, 0, 0.03) 4px);
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 11;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 256px 256px;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 28px;
+            left: 28px;
+            z-index: 50;
+            color: #888888;
+            text-decoration: none;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            transition: opacity 0.2s, color 0.2s;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .back-link:hover {
+            color: #cccccc;
+            opacity: 1;
+        }
+        .back-link::before {
+            content: '← ';
+        }
+
+        /* 主布局容器（无 opacity 过渡，始终可见） */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding-top: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 最终标题：瞬间显现，无任何过渡 */
+        .final-title {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 32px;
+            opacity: 0; /* 由 JS 瞬间设为 1 */
+        }
+        .final-title .cn {
+            font-size: 1.8rem;
+            letter-spacing: 0.2em;
+            color: #f0f0f0;
+        }
+        .final-title .en {
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+            color: #888;
+        }
+
+        /* 需要淡入的内容包裹（横线+卡片） */
+        .fade-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        .fade-content.visible {
+            opacity: 1;
+        }
+
+        .top-line {
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            margin-bottom: 48px;
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.8s cubic-bezier(0.42, 0.0, 0.58, 1.0);
+        }
+        .top-line.expand {
+            transform: scaleX(1);
+        }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            width: 70%;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .archive-card {
+            aspect-ratio: 1 / 1;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        .archive-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .card-1 { background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%); }
+        .card-2 { background: linear-gradient(135deg, #222222 0%, #383838 100%); }
+        .card-3 { background: linear-gradient(135deg, #2e2e2e 0%, #444444 100%); }
+        .card-4 { background: linear-gradient(135deg, #3a3a3a 0%, #505050 100%); }
+        .card-5 { background: linear-gradient(135deg, #464646 0%, #5c5c5c 100%); }
+        .card-6 { background: linear-gradient(135deg, #525252 0%, #686868 100%); }
+
+        .card-label {
+            width: 70%;
+            height: 22%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Courier New", "Fira Code", monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: #000000;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .archive-card:hover .card-label {
+            background: #ffffff;
+            transform: scale(1.02);
+        }
+
+        /* 开场动画 */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .anim-wrapper {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .anim-wrapper svg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: calc(100% + 24px);
+            height: calc(100% + 16px);
+            pointer-events: none;
+        }
+
+        .draw-rect {
+            stroke: rgba(255, 255, 255, 0.6);
+            stroke-width: 1.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: drawLine 1.8s cubic-bezier(0.42, 0.0, 0.58, 1.0) forwards;
+        }
+
+        @keyframes drawLine {
+            0% { stroke-dashoffset: 2000; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .anim-text {
+            opacity: 0;
+            filter: blur(12px);
+            animation: revealText 1.2s ease forwards;
+        }
+        .anim-cn {
+            font-size: 1.8rem;
+            letter-spacing: 0.2em;
+            color: #f0f0f0;
+        }
+        .anim-en {
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+            color: #888;
+        }
+
+        @keyframes revealText {
+            0% { opacity: 0; filter: blur(12px); }
+            100% { opacity: 1; filter: blur(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-link">返回</a>
+
+    <!-- 开场动画覆盖层 -->
+    <div class="intro-overlay" id="introOverlay">
+        <div class="anim-wrapper" id="animWrapper">
+            <svg id="rectSvg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path id="rectPath" d="M 100 0 L 200 0 L 200 100 L 0 100 L 0 0 L 100 0" 
+                      class="draw-rect"/>
+            </svg>
+            <div class="anim-text anim-cn">档案</div>
+            <div class="anim-text anim-en">Archives</div>
+        </div>
+    </div>
+
+    <!-- 主内容（始终可见，但内部淡入元素单独控制） -->
+    <div class="main-container" id="mainContainer">
+        <!-- 最终标题：瞬间显现 -->
+        <div class="final-title" id="finalTitle">
+            <span class="cn">档案</span>
+            <span class="en">Archives</span>
+        </div>
+
+        <!-- 淡入内容包裹：横线 + 卡片 -->
+        <div class="fade-content" id="fadeContent">
+            <div class="top-line" id="topLine"></div>
+            <div class="archive-grid">
+                <div class="archive-card card-1"><div class="card-label">111</div></div>
+                <div class="archive-card card-2"><div class="card-label">222</div></div>
+                <div class="archive-card card-3"><div class="card-label">333</div></div>
+                <div class="archive-card card-4"><div class="card-label">444</div></div>
+                <div class="archive-card card-5"><div class="card-label">555</div></div>
+                <div class="archive-card card-6"><div class="card-label">666</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const animWrapper = document.getElementById('animWrapper');
+            const introOverlay = document.getElementById('introOverlay');
+            const finalTitle = document.getElementById('finalTitle');
+            const fadeContent = document.getElementById('fadeContent');
+            const topLine = document.getElementById('topLine');
+            const rectSvg = document.getElementById('rectSvg');
+            const rectPath = document.getElementById('rectPath');
+
+            let drawFinished = false;
+            let revealFinished = false;
+
+            // 线条绘制完成
+            rectPath.addEventListener('animationend', function(e) {
+                if (e.animationName === 'drawLine') {
+                    drawFinished = true;
+                    rectSvg.style.transition = 'opacity 0.4s ease';
+                    rectSvg.style.opacity = '0';
+                    checkBoth();
+                }
+            });
+
+            // 文字渐显完成
+            const animTexts = document.querySelectorAll('.anim-text');
+            animTexts.forEach(el => {
+                el.addEventListener('animationend', function(e) {
+                    if (e.animationName === 'revealText') {
+                        revealFinished = true;
+                        checkBoth();
+                    }
+                });
+            });
+
+            function checkBoth() {
+                if (drawFinished && revealFinished) {
+                    setTimeout(moveTitleToTop, 500);
+                }
+            }
+
+            function moveTitleToTop() {
+                const wrapperRect = animWrapper.getBoundingClientRect();
+                const currentCenterX = wrapperRect.left + wrapperRect.width / 2;
+                const currentCenterY = wrapperRect.top + wrapperRect.height / 2;
+
+                const targetRect = finalTitle.getBoundingClientRect();
+                const targetCenterX = targetRect.left + targetRect.width / 2;
+                const targetCenterY = targetRect.top + targetRect.height / 2;
+
+                const deltaX = targetCenterX - currentCenterX;
+                const deltaY = targetCenterY - currentCenterY;
+
+                animWrapper.style.transition = 'transform 1.2s cubic-bezier(0.42, 0.0, 0.58, 1.0)';
+                animWrapper.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+                animWrapper.addEventListener('transitionend', function handler() {
+                    animWrapper.removeEventListener('transitionend', handler);
+
+                    // 短暂停留 0.6 秒
+                    setTimeout(() => {
+                        // 瞬间移除开屏文字
+                        introOverlay.style.display = 'none';
+                        // 瞬间显示最终标题（无过渡）
+                        finalTitle.style.opacity = '1';
+                        // 淡入横线和卡片
+                        fadeContent.classList.add('visible');
+                        // 横线展开
+                        setTimeout(() => {
+                            topLine.classList.add('expand');
+                        }, 100);
+                    }, 600);
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
