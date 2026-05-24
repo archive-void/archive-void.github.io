@@ -132,13 +132,13 @@
             transform: scaleX(1);
         }
 
-        /* 档案网格 - 4列 */
+        /* 档案网格 - 4列，放大 */
         .archive-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
-            width: 82%;
-            max-width: 920px;
+            width: 90%;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
@@ -151,7 +151,6 @@
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.3s ease, box-shadow 0.35s ease;
-            /* 立体阴影 */
             box-shadow:
                 0 8px 20px rgba(0, 0, 0, 0.7),
                 0 2px 6px rgba(0, 0, 0, 0.5),
@@ -173,14 +172,13 @@
                 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        /* 背景渐变层 */
         .card-bg {
             position: absolute;
             inset: 0;
             border-radius: 10px;
             transition: filter 0.35s ease, brightness 0.35s ease;
         }
-        /* 12级连续灰度渐变 - 从亮到暗 */
+        /* 12级连续灰度渐变 */
         .card-1  .card-bg { background: linear-gradient(145deg, #d0d0d0 0%, #bebebe 50%, #aaaaaa 100%); }
         .card-2  .card-bg { background: linear-gradient(145deg, #bcbcbc 0%, #acacac 50%, #9a9a9a 100%); }
         .card-3  .card-bg { background: linear-gradient(145deg, #aaaaaa 0%, #9a9a9a 50%, #8a8a8a 100%); }
@@ -194,11 +192,9 @@
         .card-11 .card-bg { background: linear-gradient(145deg, #262626 0%, #1e1e1e 50%, #181818 100%); }
         .card-12 .card-bg { background: linear-gradient(145deg, #1c1c1c 0%, #161616 50%, #101010 100%); }
 
-        /* 正常卡片悬停变亮 */
         .card-normal:hover .card-bg {
             filter: brightness(1.2);
         }
-        /* 侵蚀卡片默认变暗，悬停更暗 */
         .card-corrupted .card-bg {
             filter: brightness(0.68);
         }
@@ -206,7 +202,6 @@
             filter: brightness(0.35);
         }
 
-        /* 粒子层 */
         .particle-layer {
             position: absolute;
             inset: 0;
@@ -226,27 +221,14 @@
 
         @keyframes particlePulse {
             0%,
-            100% {
-                opacity: 0.15;
-            }
-            22% {
-                opacity: 0.8;
-            }
-            38% {
-                opacity: 0.2;
-            }
-            55% {
-                opacity: 0.9;
-            }
-            70% {
-                opacity: 0.25;
-            }
-            85% {
-                opacity: 0.65;
-            }
+            100% { opacity: 0.15; }
+            22% { opacity: 0.8; }
+            38% { opacity: 0.2; }
+            55% { opacity: 0.9; }
+            70% { opacity: 0.25; }
+            85% { opacity: 0.65; }
         }
 
-        /* 标签 */
         .card-label {
             position: absolute;
             top: 50%;
@@ -332,12 +314,8 @@
             animation: drawLine 1.8s cubic-bezier(0.42, 0.0, 0.58, 1.0) forwards;
         }
         @keyframes drawLine {
-            0% {
-                stroke-dashoffset: 2000;
-            }
-            100% {
-                stroke-dashoffset: 0;
-            }
+            0% { stroke-dashoffset: 2000; }
+            100% { stroke-dashoffset: 0; }
         }
         .anim-text {
             opacity: 0;
@@ -355,14 +333,8 @@
             color: #888;
         }
         @keyframes revealText {
-            0% {
-                opacity: 0;
-                filter: blur(12px);
-            }
-            100% {
-                opacity: 1;
-                filter: blur(0);
-            }
+            0% { opacity: 0; filter: blur(12px); }
+            100% { opacity: 1; filter: blur(0); }
         }
     </style>
 </head>
@@ -390,12 +362,10 @@
         <div class="fade-content" id="fadeContent">
             <div class="top-line" id="topLine"></div>
             <div class="archive-grid" id="archiveGrid">
-                <!-- 卡片1：正常 -->
                 <div class="archive-card card-normal card-1">
                     <div class="card-bg"></div>
                     <div class="card-label">111</div>
                 </div>
-                <!-- 卡片2~12：侵蚀 -->
                 <div class="archive-card card-corrupted card-2" data-card="2">
                     <div class="card-bg"></div>
                     <div class="particle-layer"></div>
@@ -525,7 +495,6 @@
             const SLOW_INTERVAL = 800;
             const FAST_INTERVAL = 180;
 
-            // 存储每个卡片的粒子数据
             const cardParticleData = new Map();
 
             corruptedCards.forEach(card => {
@@ -587,14 +556,11 @@
                     lastUpdate: 0,
                 });
 
-                // 初始化ambient粒子
                 refreshAmbient(card);
 
-                // 悬停事件
                 card.addEventListener('mouseenter', () => {
                     const data = cardParticleData.get(card);
                     data.isHovered = true;
-                    // 悬停时全部粒子可见
                     data.particles.forEach(p => {
                         p.el.classList.add('visible');
                         p.el.style.setProperty('--dur', (0.08 + Math.random() * 0.2) + 's');
@@ -603,7 +569,6 @@
                 card.addEventListener('mouseleave', () => {
                     const data = cardParticleData.get(card);
                     data.isHovered = false;
-                    // 恢复：重置动画时长，刷新ambient
                     data.particles.forEach(p => {
                         p.el.style.setProperty('--dur', p.duration + 's');
                     });
@@ -614,12 +579,10 @@
             function refreshAmbient(card) {
                 const data = cardParticleData.get(card);
                 if (!data || data.isHovered) return;
-                // 清除旧ambient
                 data.ambientSet.forEach(i => {
                     data.particles[i].el.classList.remove('visible');
                 });
                 data.ambientSet.clear();
-                // 随机选AMBIENT_COUNT个
                 const indices = [];
                 while (indices.length < AMBIENT_COUNT) {
                     const r = Math.floor(Math.random() * TOTAL_PARTICLES);
@@ -629,7 +592,6 @@
                     data.particles[i].el.classList.add('visible');
                     data.ambientSet.add(i);
                 });
-                // 随机更新这些粒子的位置
                 indices.forEach(i => {
                     const p = data.particles[i];
                     p.el.style.left = (3 + Math.random() * 90) + '%';
@@ -643,7 +605,6 @@
                     if (!data) return;
 
                     if (data.isHovered) {
-                        // 悬停：快速更新所有粒子位置
                         if (!data._lastFast || timestamp - data._lastFast > FAST_INTERVAL) {
                             data._lastFast = timestamp;
                             data.particles.forEach(p => {
@@ -652,7 +613,6 @@
                             });
                         }
                     } else {
-                        // 非悬停：慢速更新ambient粒子位置并刷新选择
                         if (!data._lastSlow || timestamp - data._lastSlow > SLOW_INTERVAL) {
                             data._lastSlow = timestamp;
                             refreshAmbient(card);
@@ -662,7 +622,6 @@
                 requestAnimationFrame(updateAllParticles);
             }
 
-            // 启动粒子更新循环
             requestAnimationFrame(updateAllParticles);
 
         })();
