@@ -16,7 +16,7 @@
             color: #ffffff;
             font-family: "Courier New", "Fira Code", "SF Mono", "Menlo", "PingFang SC", "Microsoft YaHei", monospace;
             min-height: 100vh;
-            padding: 24px 0 48px;
+            padding: 20px 0 40px;
             user-select: none;
             -webkit-user-select: none;
             cursor: default;
@@ -56,8 +56,8 @@
 
         .back-link {
             position: fixed;
-            top: 20px;
-            left: 24px;
+            top: 16px;
+            left: 20px;
             z-index: 50;
             color: #888888;
             text-decoration: none;
@@ -82,7 +82,7 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            padding-top: 80px;
+            padding-top: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -93,7 +93,7 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             opacity: 0;
         }
         .final-title .cn {
@@ -123,7 +123,7 @@
             width: 100%;
             height: 1px;
             background: rgba(255, 255, 255, 0.2);
-            margin-bottom: 36px;
+            margin-bottom: 28px;
             transform: scaleX(0);
             transform-origin: center;
             transition: transform 0.8s cubic-bezier(0.42, 0.0, 0.58, 1.0);
@@ -132,17 +132,17 @@
             transform: scaleX(1);
         }
 
-        /* 档案网格 - 4列，放大适应屏幕 */
+        /* 网格：更大面积，更宽，间距略小 */
         .archive-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            width: 95%;
-            max-width: 1400px;
+            gap: 16px;
+            width: 98%;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
-        /* 卡片：宽比高长 4:3 */
+        /* 卡片宽高比 4:3 */
         .archive-card {
             position: relative;
             aspect-ratio: 4 / 3;
@@ -247,7 +247,6 @@
             z-index: 5;
             pointer-events: none;
             white-space: nowrap;
-            font-size: 1.15rem;
         }
         .card-normal .card-label {
             background: rgba(255, 255, 255, 0.94);
@@ -261,15 +260,18 @@
             box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
+        /* 侵蚀卡片标签：字号增大，更清晰 */
         .card-corrupted .card-label {
             background: rgba(135, 22, 22, 0.88);
             color: #e6e6e6;
             box-shadow: 0 0 6px rgba(255, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.5);
             text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-            font-size: 0.95rem;
+            font-size: 1.25rem;
+            font-family: "Courier New", "Fira Code", "Consolas", monospace;
+            font-weight: 700;
         }
         .card-corrupted:hover .card-label {
-            transform: translate(-50%, -50%) scale(1.14);
+            transform: translate(-50%, -50%) scale(1.12);
             text-shadow: 0 0 18px rgba(255, 45, 45, 0.9), 0 0 34px rgba(255, 0, 0, 0.55);
             box-shadow: 0 0 22px rgba(255, 0, 0, 0.5), 0 0 8px rgba(255, 0, 0, 0.3);
         }
