@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>档案 - ARG</title>
+    <title>档案 Archives</title>
     <style>
         * {
             margin: 0;
@@ -132,7 +132,6 @@
             transform: scaleX(1);
         }
 
-        /* 网格：更大面积，更宽，间距略小 */
         .archive-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -142,64 +141,83 @@
             margin: 0 auto;
         }
 
-        /* 卡片宽高比 4:3 */
+        /* 卡片样式增强 */
         .archive-card {
             position: relative;
             aspect-ratio: 4 / 3;
             border-radius: 10px;
             cursor: pointer;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             transition: transform 0.3s ease, box-shadow 0.35s ease;
+            /* 增强的立体阴影：深色投影 + 轻微内高光 */
             box-shadow:
-                0 8px 20px rgba(0, 0, 0, 0.7),
-                0 2px 6px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+                0 10px 25px rgba(0, 0, 0, 0.8),
+                0 3px 8px rgba(0, 0, 0, 0.6),
+                inset 0 1px 2px rgba(255, 255, 255, 0.06),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.3);
         }
+
         .card-normal:hover {
             transform: translateY(-6px);
             box-shadow:
-                0 0 24px rgba(255, 255, 255, 0.45),
-                0 0 50px rgba(255, 255, 255, 0.2),
-                0 12px 30px rgba(0, 0, 0, 0.75),
-                0 4px 10px rgba(0, 0, 0, 0.5);
+                0 0 30px rgba(255, 255, 255, 0.5),
+                0 0 60px rgba(255, 255, 255, 0.2),
+                0 14px 35px rgba(0, 0, 0, 0.8),
+                0 5px 12px rgba(0, 0, 0, 0.6),
+                inset 0 1px 2px rgba(255, 255, 255, 0.1);
         }
+
         .card-corrupted:hover {
             transform: translateY(-4px);
             box-shadow:
-                0 10px 26px rgba(255, 0, 0, 0.2),
-                0 4px 10px rgba(0, 0, 0, 0.7),
-                0 2px 4px rgba(0, 0, 0, 0.5);
+                0 12px 28px rgba(255, 0, 0, 0.25),
+                0 4px 12px rgba(0, 0, 0, 0.8),
+                0 2px 5px rgba(0, 0, 0, 0.6),
+                inset 0 1px 2px rgba(255, 255, 255, 0.04);
         }
 
+        /* 背景渐变：从左上到右下，强对比，营造灯光感 */
         .card-bg {
             position: absolute;
             inset: 0;
             border-radius: 10px;
             transition: filter 0.35s ease, brightness 0.35s ease;
+            /* 默认添加内发光叠加层 */
         }
-        /* 12级连续灰度渐变 */
-        .card-1  .card-bg { background: linear-gradient(145deg, #d0d0d0 0%, #bebebe 50%, #aaaaaa 100%); }
-        .card-2  .card-bg { background: linear-gradient(145deg, #bcbcbc 0%, #acacac 50%, #9a9a9a 100%); }
-        .card-3  .card-bg { background: linear-gradient(145deg, #aaaaaa 0%, #9a9a9a 50%, #8a8a8a 100%); }
-        .card-4  .card-bg { background: linear-gradient(145deg, #989898 0%, #888888 50%, #787878 100%); }
-        .card-5  .card-bg { background: linear-gradient(145deg, #868686 0%, #767676 50%, #686868 100%); }
-        .card-6  .card-bg { background: linear-gradient(145deg, #747474 0%, #646464 50%, #565656 100%); }
-        .card-7  .card-bg { background: linear-gradient(145deg, #626262 0%, #525252 50%, #464646 100%); }
-        .card-8  .card-bg { background: linear-gradient(145deg, #505050 0%, #424242 50%, #363636 100%); }
-        .card-9  .card-bg { background: linear-gradient(145deg, #404040 0%, #343434 50%, #2a2a2a 100%); }
-        .card-10 .card-bg { background: linear-gradient(145deg, #323232 0%, #282828 50%, #202020 100%); }
-        .card-11 .card-bg { background: linear-gradient(145deg, #262626 0%, #1e1e1e 50%, #181818 100%); }
-        .card-12 .card-bg { background: linear-gradient(145deg, #1c1c1c 0%, #161616 50%, #101010 100%); }
+
+        .card-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            /* 叠加柔光层 */
+            background: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* 12级连续灰度渐变：从左上到右下（to bottom right） */
+        .card-1  .card-bg { background: linear-gradient(to bottom right, #e6e6e6 0%, #cccccc 30%, #aaaaaa 100%); }
+        .card-2  .card-bg { background: linear-gradient(to bottom right, #d4d4d4 0%, #b8b8b8 30%, #969696 100%); }
+        .card-3  .card-bg { background: linear-gradient(to bottom right, #c2c2c2 0%, #a6a6a6 30%, #848484 100%); }
+        .card-4  .card-bg { background: linear-gradient(to bottom right, #b0b0b0 0%, #949494 30%, #727272 100%); }
+        .card-5  .card-bg { background: linear-gradient(to bottom right, #9e9e9e 0%, #828282 30%, #606060 100%); }
+        .card-6  .card-bg { background: linear-gradient(to bottom right, #8c8c8c 0%, #707070 30%, #4e4e4e 100%); }
+        .card-7  .card-bg { background: linear-gradient(to bottom right, #7a7a7a 0%, #5e5e5e 30%, #3c3c3c 100%); }
+        .card-8  .card-bg { background: linear-gradient(to bottom right, #686868 0%, #4c4c4c 30%, #2a2a2a 100%); }
+        .card-9  .card-bg { background: linear-gradient(to bottom right, #565656 0%, #3a3a3a 30%, #1a1a1a 100%); }
+        .card-10 .card-bg { background: linear-gradient(to bottom right, #444444 0%, #2a2a2a 30%, #0e0e0e 100%); }
+        .card-11 .card-bg { background: linear-gradient(to bottom right, #323232 0%, #1a1a1a 30%, #050505 100%); }
+        .card-12 .card-bg { background: linear-gradient(to bottom right, #202020 0%, #0c0c0c 30%, #000000 100%); }
 
         .card-normal:hover .card-bg {
-            filter: brightness(1.2);
+            filter: brightness(1.25);
         }
         .card-corrupted .card-bg {
-            filter: brightness(0.68);
+            filter: brightness(0.65);
         }
         .card-corrupted:hover .card-bg {
-            filter: brightness(0.35);
+            filter: brightness(0.32);
         }
 
         .particle-layer {
@@ -220,8 +238,7 @@
         }
 
         @keyframes particlePulse {
-            0%,
-            100% { opacity: 0.15; }
+            0%, 100% { opacity: 0.15; }
             22% { opacity: 0.8; }
             38% { opacity: 0.2; }
             55% { opacity: 0.9; }
@@ -240,7 +257,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: "Courier New", "Fira Code", monospace;
             font-weight: 700;
             letter-spacing: 0.1em;
             transition: transform 0.25s ease, box-shadow 0.25s ease, text-shadow 0.25s ease;
@@ -252,6 +268,7 @@
             background: rgba(255, 255, 255, 0.94);
             color: #000000;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            font-family: "Courier New", "Fira Code", monospace;
             font-size: 1.3rem;
         }
         .card-normal:hover .card-label {
@@ -260,16 +277,16 @@
             box-shadow: 0 0 16px rgba(255, 255, 255, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
-        /* 侵蚀卡片标签：锐利字体，更大字号，更宽字间距 */
+        /* 尖锐字体：使用 Menlo, Consolas 等硬朗等宽字体 */
         .card-corrupted .card-label {
             background: rgba(135, 22, 22, 0.88);
             color: #e6e6e6;
             box-shadow: 0 0 6px rgba(255, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.5);
             text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
             font-size: 1.25rem;
-            font-family: "Consolas", "SF Mono", "Menlo", "Courier New", monospace;
+            font-family: "Menlo", "Consolas", "SF Mono", "Courier New", monospace;
             font-weight: 700;
-            letter-spacing: 0.18em;
+            letter-spacing: 0.2em;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -279,7 +296,7 @@
             box-shadow: 0 0 22px rgba(255, 0, 0, 0.5), 0 0 8px rgba(255, 0, 0, 0.3);
         }
 
-        /* 开场动画 */
+        /* 开场动画保持不变 */
         .intro-overlay {
             position: fixed;
             top: 0;
